@@ -1,366 +1,136 @@
+<!DOCTYPE html>
 <html>
-	<head>
-		<title>My BBC Tech News Clone</title>
-		
-		
-		<style type="text/css">
-			
-			#topbar{
-				width:80%;
-				margin:0 auto;
-				height:40px;
-				}
-			
-			body{
-				margin:0;
-				padding:0;
-				font-family:Helvetica,Arial,sans-serif;
-				}
-			#logo{
-				margin-top:8px;
-				width:100px;
-				float:left;
-				margin-right:8px;
-				
-				}
-			
-			.topbar-section{
-				float:left;
-				border-left: 1px #CCCCCC solid;
-				height:100%;
-				}
-				
-			#signin-image{
-				width:25px;
-				margin:11px 15px;
-				float:left;
-				}
-				
-			.signin-text{
-				font-weight:bold;
-				font-size:90%;
-				position:relative;
-				top:14px;
-				padding-right:50px;
-				
-				}
-				
-			.topbar-menu{
-				font-weight:bold;
-				font-size:90%;
-				padding:14px 15px 0 15px;
-				height: 27px;
-				}
-				
-			#down{
-				width:15px;
-				margin-left:20px;
-				}
-				
-			#search-box{
-				background-color:#E4E4E4;
-				border:none;
-				font-weight:bold;
-				font-size:14px;
-				padding:5px;
-				margin:5px 0 5px 5px;
-				float:left;
-				
-				}
-			#search{
-				margin:5px 0 0 0;
-				height:27px;
-				}
-			
-			.clear{
-				clear:both;
-				}
-				
-			#menu-bar-container{
-				background-color:#BB1919;
-				width:100%;
-				height:70px;
-				border-top:1px solid #CCCCCC;
-				}
-				
-				
-			#menu-bar{
-				width:80%;
-				margin: 0 auto;
-				}
-				
-			h1{
-				padding:0;
-				margin:0;
-				color:white;
-				font-size:40px;
-				font-weight:normal;
-				}
-				
-			#menu-bar-container-2{
-				width:100%;
-				background-color:#A91717;
-				
-				
-				}
-			
-			#menu-bar-2{
-				width:80%;
-				margin: 0 auto;
-				height:30px;
-				}
-				
-			#menu-bar-2 a{
-				color:white;
-				text-decoration:none;
-				padding:0 10px;
-				border-right:1px solid #BB4545;
-				font-size:14px;
-				position:relative;
-				top:7px;
-				}
-			#menu-bar-2 a:hover{
-				text-decoration:underline;
-				}
-			
-			.noborder{
-				border:none !important;
-				}
-			
-			#reddown{
-				height:10px;
-				position:relative;
-				top:9px;
-				}
-			
-			#page-container{
-				width:80%;
-				margin:0 auto;
-				}
-				
-			h2{
-				font-weight:normal;
-				margin-top:30px;
-				font-size:20px;
-				border-bottom:2px solid #a91717;
-				width:105px;
-				}
-			h3 a{
-				color:black;
-				font-size:30px;
-				text-decoration:none;
-				}
-            
-            h3 a:hover{
-                color:#1167a8;
-                }
-				
-            #article-summary{
-                color:#5a5a5a;
-                width:260px;
-                float:left;
-            }
-            
-            #article-summary img{
-                height:15px;
-                position:relative;
-                top:2px;
-                
-            }
-            
-            #topic-link{
-                text-decoration:none;
-                color:#a91717;
-                float:right;
-                border-left:1px solid #CCCCCC;
-                padding-left:10px;
-            }
-            
-            #article-summary a:hover{
-                color:#1167a8;
-            }
-            
-            .date{
-                padding-right:10px;
-                color: #5a5a5a;
-            }
-            
-            #article-container{
-               float:left;
-                width:670px;
-                border-right: 1px solid #CCCCCC;
-                padding-right: 20px;
-            }
-            
-            #main-article-image{
-                margin-left:20px;
-                width:360px;
-            }
-            #article-hr{
-                border-top:1px solid #a91717;
-                width:50px;
-            }
-            
-            .article-link{
-                color:black;
-                text-decoration:none;
-                
-            }
-            
-            
-            
-            
-		</style>
-		</head>
-		
-		<body>
-			<div id="topbar">
-			
-				<img id="logo" src="images/bbc-logo.png">
-				<div id="sigin-div" class="topbar-section">
-			
-					<img id="signin-image" src="images/sign-in.png">
-			
-					<span class="signin-text">Sign in</span>
-				</div>
-			
-				<div class="topbar-section topbar-menu">
-					News
-				</div>
-				
-				<div class="topbar-section topbar-menu">
-					Sport
-				</div>
-				
-				<div class="topbar-section topbar-menu">
-					Weather
-				</div>
-				
-				<div class="topbar-section topbar-menu">
-					Shop
-				</div>
-				
-				<div class="topbar-section topbar-menu">
-					Earth
-				</div>
-				
-				<div class="topbar-section topbar-menu">
-					Travel
-				</div>
-				
-				<div class="topbar-section topbar-menu">
-					More
-					<img id="down" src="images/down.png">
-					
-				</div>
-				
-				<div class="topbar-section">
-					<input id="search-box" type="text" value="Search">
-					<input type="image" id="search" src="images/search.png">	
-				</div>
+<head>
+	<title>Portfolio</title>
+	<!-- css files -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.1/css/bulma.min.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/styles.css">
+
+	<link rel="icon" type="image/x-icon" href="assets/img/favicon.png">
+	<meta name="author" content="Ishan Gautam">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+	<body>
+		<!-- Navbar -->
+		<nav class="nav container void-background">
+			<!-- This "nav-menu" is hidden on mobile -->
+			<!-- Add the modifier "is-active" to display it on mobile -->
+			<div class="nav-left">
+				<!--<a href="http://medium.com/@hassanhelfi/" class="nav-item">
+					<span class="icon">
+						<i class="fa fa-medium"></i>
+					</span>
+				</a>-->
+				<a href="https://github.com/iamishan9" class="nav-item">
+					<span class="icon">
+						<i class="fa fa-github"></i>
+					</span>
+				</a>
+				<a href="https://twitter.com/ishuxbox" class="nav-item">
+					<span class="icon">
+						<i class="fa fa-twitter"></i>
+					</span>
+				</a>				
 			</div>
-			
-			<div class="clear"></div>
-			
-			<div id="menu-bar-container">
-					<div id="menu-bar">
-					<h1>
-					NEWS
-					</h1> 
-					
+
+			<div class="nav-right nav-menu">
+				<a class="nav-item" href="#about">About</a>
+				<a class="nav-item" href="#projects">Projects</a>
+				<a class="nav-item" href="#social">Social</a>
+			</div>
+
+			<!-- This "nav-toggle" hamburger menu is only visible on mobile -->
+			<!-- You need JavaScript to toggle the "is-active" class on "nav-menu" -->
+			<span class="nav-toggle">
+				<span></span>
+				<span></span>
+				<span></span>
+			</span>
+		</nav>
+				
+		<!-- About Me -->
+		<section id="about" class="section section-1">
+			<div class="container has-text-centered">
+				<!-- Source: https://flic.kr/p/pAZBNK -->
+				<img class="avatar" src="assets/img/profile.png">
+			</div>
+			<div class="container"></br>
+				<p class="intro">
+					I am Ishan Gautam.
+				</p>
+			</div>
+		</section>
+		
+		<!-- Projects -->
+		<section  id="projects" class="section section-2">
+			<div class="container">
+				<div class="has-text-centered">
+					<h3 class="title is-3">Projects</h3>
+				</div>
+				
+				<div class="columns is-multiline is-desktop">
+					<!-- Project 1 -->
+					<div class="column">
+						<div class="box project-text">
+							<article>
+								<div>
+									<figure class="image project-figure">
+										<img src="assets/img/project-1.jpg" alt="Image">
+									</figure>
+								</div>
+								<div>			
+									<p>
+										Mero Kharcha is an expense manager application designed for android devices.
+									</p>
+								</div>
+							</article>
+						</div>
 					</div>
-					
-				
-			
-			<div id="menu-bar-container-2">
-			
-			
-			
-				<div id="menu-bar-2">
-				<a href="">Home</a>
-				<a href="">Video</a>
-				<a href="">World</a>
-				<a href="">Asia</a>
-				<a href="">UK</a>
-				<a href="">Business</a>
-				<a href="">Tech</a>
-				<a href="">Science</a>
-				<a href="">Magazine</a>
-				<a href="">Entertainment & Arts</a>
-				<a href="">Health</a>
-				<a href="">World TV News</a>
-				<a href="" class="noborder">More</a>
-				<img id="reddown" src="images/reddown.png">
-				
+					<!-- Project 2 -->
+					<div class="column">
+						<div class="box project-text">
+							<article>
+								<div>
+									<figure class="image project-figure">
+										<img src="assets/img/project-2.jpg" alt="Image">
+									</figure>
+								</div>
+								<div>			
+									<p>
+										
+									</p>
+								</div>
+							</article>
+						</div>
+					</div>
 				</div>
 			</div>
-			
-		</div>
+		</section>
+
+		<!-- Social -->
+		<section id="social" class="section section-3">
+			<div class="container">
+				<div class="has-text-centered">					
+					<h3 class="title is-3">Contact Me On:</h3>
+				</div>
+				<div class="social-container columns">
+					<div class="column is-6 has-text-centered">
+						<a target="_blank" href="https://www.linkedin.com/in/ishan-gautam-59982a140/"><img class="" src="assets/img/linkedin.png"></a>
+					</div>
+					<div class="column is-6 has-text-centered">
+						<a target="_blank" href="https://www.instagram.com/ishuxbox"><img class="" src="assets/img/instagram.png"></a>
+					</div>
+				</div>
+			</div>
+		</section>	
 		
-		<div class="clear">
-		</div>
-		<div id="page-container">
-		      <div id="main-article">
+		<!-- Footer -->
+		<section class="section-4 has-text-centered container">
+			Made By: Ishan Gautam
+		</section>
 		
-			<h2>
-			Technology
-			</h2>
-                  
-            <div id="article-container">      
-			<h3><a href="">The boy behind Facebook's best chatbot</a></h3>
-		
-            <div id="article-summary">
-                 <p> The boy behind Facebook's best chatbot
-Alec Jones aspires to one day work for 'exciting' tech giants
-A simple-yet-clever chat bot gives Dave Lee hope that this immature technology will be worth while.
-                </p>
-                <p><img src="images/clock.png"><span class="date">18 February 2017</span><a id="topic-link" href="">Technology</a></p>
-          
-                <hr id="article-hr" align="left">
-                <p><a class="article-link" href="">Hello, I am BBCTechbot</a></p>
-
-                </div>
-               
-             <img id="main-article-image" src="images/main-article-image.jpg">
-                
-                
-                  </div>
-            
-            
-            
-            </div>
-		</div>
-		
-		
-		
-		
-		</body>
-			
-</html>	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		<!-- Scripts  -->
+		<script src="controller.js"></script>		
+	</body>	
+</html>
