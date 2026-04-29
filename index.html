@@ -1,488 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ishan Gautam | 3D Portfolio</title>
+    <meta name="description" content="Drive through Ishan Gautam's interactive 3D software engineering portfolio.">
+    <meta name="author" content="Ishan Gautam">
+    <meta name="theme-color" content="#101820">
+    <meta property="og:title" content="Ishan Gautam | 3D Portfolio">
+    <meta property="og:description" content="A gamified 3D portfolio for software engineering, IoT, data, and game projects.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://iamishan9.github.io/">
+    <meta property="og:image" content="https://iamishan9.github.io/images/ishan1.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="apple-touch-icon" sizes="180x180" href="./images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon-16x16.png">
+    <link rel="manifest" href="./images/site.webmanifest">
+    <link rel="stylesheet" href="./css/portfolio.css">
+  </head>
+  <body>
+    <canvas id="world" aria-label="Interactive 3D portfolio world"></canvas>
 
+    <div class="scene-shade" aria-hidden="true"></div>
 
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-	<meta name="generator" content="Hugo 0.74.3" />
-	<title>
-			
-			
-					Ishan Gautam
-			
-	</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	
-	<link rel="stylesheet" href="https://d1azc1qln24ryf.cloudfront.net/114779/Socicon/style-cf.css?u8vidh">
-	<link rel="stylesheet" type="text/css" href="https://iamishan9.github.io/css/styles.css">
-	
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:800" rel="stylesheet">
-	<link rel="stylesheet" href="https://iamishan9.github.io/css/highlight.css">
-	
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <header class="topbar">
+      <a class="brand" href="#about" data-station-link="about" aria-label="Open the about area">
+        <span class="brand-mark" aria-hidden="true">IG</span>
+        <span>
+          <strong>Ishan Gautam</strong>
+          <small>Software engineer in France</small>
+        </span>
+      </a>
 
+      <nav class="station-nav" aria-label="Portfolio areas">
+        <a href="#about" data-station-link="about">About</a>
+        <a href="#skills" data-station-link="skills">Skills</a>
+        <a href="#experience" data-station-link="experience">Experience</a>
+        <a href="#projects" data-station-link="projects">Projects</a>
+        <a href="#contact" data-station-link="contact">Contact</a>
+      </nav>
+    </header>
 
-	
-	<meta name="author" content="Ishan Gautam">
-	<meta name="theme-color" content="#000000">
-
-	<link rel="alternate" type="application/rss&#43;xml" href="https://iamishan9.github.io/index.xml" />
-	
-<meta itemprop="name" content="Ishan Gautam">
-<meta itemprop="description" content="">
-
-<meta name="og:title" content="Ishan Gautam">
-<meta name="og:description" content="">
-<meta name="og:type" content="article">
-
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ishan Gautam">
-<meta name="twitter:description" content="">
-
-<meta name="article:author" content="Ishan Gautam">
-
-
-
-<script type="application/ld+json">
-{
-    "@context": "http://schema.org",
-    "@type": "WebSite",
-    "url": "https:\/\/iamishan9.github.io\/",
-    "name": "Ishan Gautam",
-    "author": {
-        "@type": "Person",
-        "name": "Ishan Gautam"
-    },
-    "description": "",
-}
-</script>
- 
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-	<link rel="manifest" href="/images/site.webmanifest">
-	
-
-</head>
-<body class="clearfix">
-
-
-
-
-
-<section id="sidebar" class="sidebar d-flex align-items-center p-5 gray">
-  <div class="main-info">
-
-    <img src="https://iamishan9.github.io/images/ishan1.jpg" class="rounded-circle mb-3" width="160px">
-
-    <h1 class="heading text-light">Bonjour I&#39;m <span class="highlight text-dark">Ishan Gautam</span></h1>
-    <p class="text-light">A software engineer, based in France. Jack of all traits, master of none.</p>
-
-    <div class="social my-4">
-
-      
-        <a target="_blank" href="https://github.com/iamishan9" rel="me">
-          <i class="fab fa-github text-light"></i>
-        </a>
-      
-        <a target="_blank" href="https://instagram.com/iishan9" rel="me">
-          <i class="fab fa-instagram text-light"></i>
-        </a>
-      
-        <a target="_blank" href="https://www.linkedin.com/in/iamishan/" rel="me">
-          <i class="fab fa-linkedin text-light"></i>
-        </a>
-      
-
-      
-        <a target="_blank" href="mailto:iamishan9@gmail.com">
-          <i class="fas fa-envelope text-light"></i>
-        </a>
-      
-
-    </div>
-
-    <a href="#contact" class="btn btn-light btn-lg">Contact</a>
-
-
-  </div>
-</section>
-
-
-<div class="main-content">
-	
-
-<section id="skills" class="gray1 text-light">
-  <h2 class="heading">Skills</h2>
-
-  <h4 class="sub-heading">Programming Languages</h4>
-  
-
-
-  <div class="skill">
-    <span class="h6">1. Python (also: Django, Flask)</span>
-    <div class="progress">
-      <div class="progress-bar bg-blue" role="progressbar" style="width: 80%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-  </div>
-  
-
-
-  <div class="skill">
-    <span class="h6">2. Javascript (also: ReactJS, NodeJS)</span>
-    <div class="progress">
-      <div class="progress-bar bg-blue" role="progressbar" style="width: 75%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-  </div>
-  
-
-
-  <div class="skill">
-    <span class="h6">3. C/C&#43;&#43;/C#</span>
-    <div class="progress">
-      <div class="progress-bar bg-blue" role="progressbar" style="width: 75%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-  </div>
-  
-
-
-  <div class="skill">
-    <span class="h6">4. Java</span>
-    <div class="progress">
-      <div class="progress-bar bg-blue" role="progressbar" style="width: 70%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-  </div>
-  
-
-  <h4 class="sub-heading">Few others</h4>
-  <div>
-    
-    <span class="other-skills text-dark"> Internet of Things</span>
-    
-    <span class="other-skills text-dark"> Programmable Matter</span>
-    
-    <span class="other-skills text-dark"> Mobile App Development</span>
-    
-    <span class="other-skills text-dark"> Machine-Learning</span>
-    
-    <span class="other-skills text-dark"> Deep-Learning</span>
-    
-    <span class="other-skills text-dark"> Microsoft-Dynamics</span>
-    
-    <span class="other-skills text-dark"> Modular Robots</span>
-    
-    <span class="other-skills text-dark"> MSSQL</span>
-    
-    <span class="other-skills text-dark"> MySQL</span>
-    
-    <span class="other-skills text-dark"> MongoDB</span>
-    
-    <span class="other-skills text-dark"> Algorithms</span>
-    
-    <span class="other-skills text-dark"> Docker</span>
-    
-    <span class="other-skills text-dark"> Data-Structures</span>
-    
-    <span class="other-skills text-dark"> Airflow</span>
-    
-    <span class="other-skills text-dark"> Cuda</span>
-    
-  </div>
-</section>
-	
-
-<section id="experience" class="gray3">
-  <h2 class="heading">Experience</h2>
-  <div id="timeline">
-    
-    <div class="timeline-item clearfix">
-      <div class="timeline-icon"></div>
-      
-      <div class="timeline-content  right ">
-        <span class="date">Oct 2014 - Nov 2018</span>
-        <h6 class="h3 my-2">Tribhuvan University</h6>
-        
-        
-        <p class="">Full Scholarship student of Bachelors in Computer Engineering</p>
+    <aside class="hud" aria-label="Portfolio status">
+      <div>
+        <span class="hud-label">Zone</span>
+        <strong id="zone-name">Launch Pad</strong>
       </div>
-    </div>
-    
-    <div class="timeline-item clearfix">
-      <div class="timeline-icon"></div>
-      
-      <div class="timeline-content ">
-        <span class="date">Nov 2018 - Aug 2019</span>
-        <h6 class="h3 my-2">Leapfrog Technology Nepal</h6>
-        
-        
-        <a target="_blank" href="https://www.lftechnology.com/">
-          <i class="fas fa-link"></i>
-          https://www.lftechnology.com/
-        </a>
-        
-        <p class="">Associate Software Engineer</p>
+      <div>
+        <span class="hud-label">Signal</span>
+        <strong id="score-value">0/5</strong>
       </div>
-    </div>
-    
-    <div class="timeline-item clearfix">
-      <div class="timeline-icon"></div>
-      
-      <div class="timeline-content  right ">
-        <span class="date">Sep 2019 - Aug 2021</span>
-        <h6 class="h3 my-2">Université Bourgogne Franche-Comté</h6>
-        
-        
-        <p class="">Masters in Intenet of Things (IoT) Full Scholarship Student</p>
+      <div>
+        <span class="hud-label">Velocity</span>
+        <strong id="speed-value">0</strong>
       </div>
-    </div>
-    
-    <div class="timeline-item clearfix">
-      <div class="timeline-icon"></div>
-      
-      <div class="timeline-content ">
-        <span class="date">Jul 2020 - Sep 2020</span>
-        <h6 class="h3 my-2">Université Bourgogne Franche-Comté</h6>
-        
-        
-        <p class="">Student Intern</p>
+    </aside>
+
+    <main class="content-panel" id="content-panel" aria-live="polite">
+      <div class="panel-heading">
+        <p id="panel-kicker">Launch Pad</p>
+        <h1 id="panel-title">Bonjour, I'm Ishan.</h1>
       </div>
-    </div>
-    
-    <div class="timeline-item clearfix">
-      <div class="timeline-icon"></div>
-      
-      <div class="timeline-content  right ">
-        <span class="date">Feb 2021 - Jul 2021</span>
-        <h6 class="h3 my-2">Faurecia Clean Mobility - R&amp;D Center, Bavans</h6>
-        
-        
-        <p class="">Software Engineering Intern</p>
+      <div id="panel-body" class="panel-body">
+        <p>
+          A software engineer based in France, building across web platforms, IoT,
+          machine learning, mobile apps, and game experiments.
+        </p>
       </div>
-    </div>
-    
-  </div>
+      <div id="panel-actions" class="panel-actions"></div>
+    </main>
 
-</section>
-	
+    <section class="mini-map" aria-label="World map">
+      <button type="button" data-station-link="about" aria-label="About area"></button>
+      <button type="button" data-station-link="skills" aria-label="Skills area"></button>
+      <button type="button" data-station-link="experience" aria-label="Experience area"></button>
+      <button type="button" data-station-link="projects" aria-label="Projects area"></button>
+      <button type="button" data-station-link="contact" aria-label="Contact area"></button>
+    </section>
 
-<section class="gray2 text-light">
-  <h2 class="heading">Projects</h2>
-
-  <div class="row justify-content-md-center text-center">
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        
-        
-        
-        <img src="/images/roadrash.jpg" style="max-height: 400px; max-width: 600px;" alt="Road-Rash">
-        
-        
-        <h5 class="mt-4 text-dark">Road-Rash</h5>
-        <p class="text-muted">A clone of the famour RoadRash game created in vanilla Javascript.</p>
-        
-        
-        <a href="https://github.com/iamishan9/Road-Rash" class="btn btn-dark btn-lg">View on Github</a>
-      </div>
+    <div class="touch-controls" aria-label="Driving controls">
+      <button type="button" data-control="forward" aria-label="Forward">^</button>
+      <button type="button" data-control="left" aria-label="Left">&lt;</button>
+      <button type="button" data-control="brake" aria-label="Brake">B</button>
+      <button type="button" data-control="right" aria-label="Right">&gt;</button>
+      <button type="button" data-control="backward" aria-label="Backward">v</button>
     </div>
 
-    
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        
-        
-        
-        <img src="/images/sgeet.png" style="max-height: 400px; max-width: 600px;" alt="SGeet: A Music Streaming Service">
-        
-        
-        <h5 class="mt-4 text-dark">SGeet: A Music Streaming Service</h5>
-        <p class="text-muted">My attempt at creating a music streaming service like Spotify but with a recommendation engine that suggests songs according to the user&#39;s post/comments on Facebook.</p>
-        
-        
-        <a href="https://github.com/iamishan9/sgeet" class="btn btn-dark btn-lg">View on Github</a>
-      </div>
-    </div>
+    <noscript>
+      <section class="noscript">
+        <h1>Ishan Gautam</h1>
+        <p>Software engineer based in France.</p>
+        <p>
+          GitHub: <a href="https://github.com/iamishan9">iamishan9</a>,
+          LinkedIn: <a href="https://www.linkedin.com/in/iamishan/">iamishan</a>,
+          Email: <a href="mailto:iamishan9@gmail.com">iamishan9@gmail.com</a>
+        </p>
+      </section>
+    </noscript>
 
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        
-        
-        
-        <img src="/images/save-nepal.png" style="max-height: 400px; max-width: 600px;" alt="Save Nepal">
-        
-        
-        <h5 class="mt-4 text-dark">Save Nepal</h5>
-        <p class="text-muted">Similar to flappy bird but its Nepal going between China and India. Available on Play Store.</p>
-        
-        
-        <a href="https://play.google.com/store/apps/details?id=com.prognepal.SaveNepal" class="btn btn-dark btn-lg">View on Play Store</a>
-      </div>
-    </div>
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        
-        
-        
-        <img src="/images/cuda.jpg" style="max-height: 400px; max-width: 600px;" alt="Histogram CUDA">
-        
-        
-        <h5 class="mt-4 text-dark">Histogram CUDA</h5>
-        <p class="text-muted">An efficient histogram algorithm for an input array of ASCII characters done with CUDA.</p>
-        
-        
-        <a href="https://github.com/iamishan9/Histogram-CUDA" class="btn btn-dark btn-lg">View on Github</a>
-      </div>
-    </div>
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        
-        
-        
-        <img src="/images/dynamic-carpool.png" style="max-height: 400px; max-width: 600px;" alt="Dynamic Carpool">
-        
-        
-        <h5 class="mt-4 text-dark">Dynamic Carpool</h5>
-        <p class="text-muted">Dynamic Carpool android app which uses the dynamic carpooling algorithm to create itineraries which reduces number of vehicle usage, carbon emission and distance covered.</p>
-        
-        
-        <a href="https://github.com/iamishan9/DynamicCarpool" class="btn btn-dark btn-lg">View on Github</a>
-      </div>
-    </div>
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        
-        
-        
-        <img src="/images/mero-kharcha.png" style="max-height: 400px; max-width: 600px;" alt="Mero Kharcha: Expense Manager">
-        
-        
-        <h5 class="mt-4 text-dark">Mero Kharcha: Expense Manager</h5>
-        <p class="text-muted">Expense managing app which shows details of your expense. Available on Play Store.</p>
-        
-        
-        <a href="https://play.google.com/store/apps/details?id=com.prognepal.MeroKharcha" class="btn btn-dark btn-lg">View on Play Store</a>
-      </div>
-    </div>
-
-    
-  </div>
-</section>
-	
-
-<section class="gray1">
-  <h2 class="heading text-light">Services</h2>
-
-  <div class="row justify-content-md-center text-center">
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        <i class="mt-3  fa fa-laptop fa-3x"></i>
-        <h5 class="mt-4">Software Development</h5>
-        <p class="text-muted">From simple scripts to desktop applications, I can help you create what you desire.</p>
-      </div>
-    </div>
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        <i class="mt-3  fa fa-mobile-alt fa-3x"></i>
-        <h5 class="mt-4">Mobile App Development</h5>
-        <p class="text-muted">Be it an utility app or a game, I can develop you a mobile app in android.</p>
-      </div>
-    </div>
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        <i class="mt-3  fa fa-wifi fa-3x"></i>
-        <h5 class="mt-4">Internet of Things</h5>
-        <p class="text-muted">Create / manage a network of smart devices connected with each other to gather information, analyse it and create an action in order to help customers or improve the system.</p>
-      </div>
-    </div>
-
-    
-
-    <div class="col-12 col-lg-6 col-md-6 mb-3">
-      <div class="card p-4">
-        <i class="mt-3  fa fa-database fa-3x"></i>
-        <h5 class="mt-4">Machine Learning/Deep Learning</h5>
-        <p class="text-muted">Analyse data, learn from them and apply what&#39;s learned to make informed decision using different algorithms in Machine Learning. Can create Deep Learning models to further improve the decision making by itself.</p>
-      </div>
-    </div>
-
-    
-  </div>
-</section>
-</div>
-
-<div style="z-index: 4; position: relative;">
-	
-	
-</div>
-
-<div class="main-content">
-	
-
-<section id="contact" class="bg-light d-flex align-items-center" style="height: 100vh;">
-  <div class="container">
-      <h2 class="heading mb-3">Contact</h2>
-
-      <div class="text-success my-3">
-        
-      </div>
-
-      <form action="https://formspree.io/iamishan9@gmail.com" method="post">
-        <div class="form-row">
-          <div class="col-12 col-xl-6 col-lg-6 col-md-6">
-            <label>Name</label>
-            <input type="text" class="form-control" name="name" placeholder="Name">
-          </div>
-          <div class="col-12 col-xl-6 col-lg-6 col-md-6">
-            <label>Email</label>
-            <input type="email" class="form-control" name="_replyto" placeholder="Email">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Message</label>
-          <textarea placeholder="Message" name="message" class="form-control" rows="4"></textarea>
-        </div>
-        <button type="submit" class="btn btn-dark">Submit</button>
-      </form>
-  </div>
-</section>
-		
-</div>
-
-<script src="https://blog.uicard.io/js/highlight.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-
-</body>
-
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<script src="https://iamishan9.github.io/js/main.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="./js/portfolio.js"></script>
+  </body>
 </html>
-	
