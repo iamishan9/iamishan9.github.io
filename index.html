@@ -26,7 +26,9 @@
 
     <header class="topbar">
       <a class="brand" href="#about" data-station-link="about" aria-label="Open the about area">
-        <span class="brand-mark" aria-hidden="true">IG</span>
+        <span class="brand-mark" aria-hidden="true">
+          <img src="./images/ishan1.jpg" alt="">
+        </span>
         <span>
           <strong>Ishan Gautam</strong>
           <small>Software engineer in France</small>
@@ -42,25 +44,21 @@
       </nav>
     </header>
 
-    <aside class="hud" aria-label="Portfolio status">
-      <div>
-        <span class="hud-label">Zone</span>
-        <strong id="zone-name">Launch Pad</strong>
-      </div>
-      <div>
-        <span class="hud-label">Signal</span>
-        <strong id="score-value">0/5</strong>
-      </div>
-      <div>
-        <span class="hud-label">Velocity</span>
-        <strong id="speed-value">0</strong>
-      </div>
-    </aside>
-
     <main class="content-panel" id="content-panel" aria-live="polite">
       <div class="panel-heading">
-        <p id="panel-kicker">Launch Pad</p>
-        <h1 id="panel-title">Bonjour, I'm Ishan.</h1>
+        <div>
+          <p id="panel-kicker">Launch Pad</p>
+          <h1 id="panel-title">Bonjour, I'm Ishan.</h1>
+        </div>
+        <button
+          class="panel-toggle"
+          id="panel-toggle"
+          type="button"
+          aria-label="Hide info panel"
+          aria-controls="panel-body"
+          aria-expanded="true"
+          title="Hide info panel"
+        ></button>
       </div>
       <div id="panel-body" class="panel-body">
         <p>
@@ -82,12 +80,9 @@
     <div class="touch-controls" aria-label="Driving controls">
       <button type="button" data-control="forward" aria-label="Forward">^</button>
       <button type="button" data-control="left" aria-label="Left">&lt;</button>
-      <button type="button" data-control="brake" aria-label="Brake">B</button>
       <button type="button" data-control="right" aria-label="Right">&gt;</button>
       <button type="button" data-control="backward" aria-label="Backward">v</button>
     </div>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <noscript>
       <section class="noscript">

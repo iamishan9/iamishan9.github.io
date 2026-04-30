@@ -1,14 +1,12 @@
 import * as THREE from "three";
 
 const canvas = document.querySelector("#world");
-const zoneName = document.querySelector("#zone-name");
-const scoreValue = document.querySelector("#score-value");
-const speedValue = document.querySelector("#speed-value");
+const contentPanel = document.querySelector("#content-panel");
 const panelKicker = document.querySelector("#panel-kicker");
 const panelTitle = document.querySelector("#panel-title");
 const panelBody = document.querySelector("#panel-body");
 const panelActions = document.querySelector("#panel-actions");
-const toast = document.querySelector("#toast");
+const panelToggle = document.querySelector("#panel-toggle");
 const stationLinks = [...document.querySelectorAll("[data-station-link]")];
 const touchButtons = [...document.querySelectorAll("[data-control]")];
 
@@ -65,7 +63,6 @@ const stationData = {
     position: new THREE.Vector3(0, 0, 0),
     title: "Bonjour, I'm Ishan.",
     kicker: "Launch Pad",
-    reward: "Signal captured: profile unlocked.",
     body: `
       <p>A software engineer based in France, building across web platforms, IoT, machine learning, mobile apps, and game experiments.</p>
       <div class="stat-strip">
@@ -88,7 +85,6 @@ const stationData = {
     position: new THREE.Vector3(-24, 0, -18),
     title: "Engineering toolkit.",
     kicker: "Skills Lab",
-    reward: "Signal captured: skills calibrated.",
     body: `
       <ul class="skill-list">
         <li><div class="skill-row"><span>Python, Django, Flask</span><span>80%</span></div><div class="meter"><span style="--level: 80%"></span></div></li>
@@ -111,7 +107,6 @@ const stationData = {
     position: new THREE.Vector3(24, 0, -18),
     title: "A route through software and research.",
     kicker: "Timeline Ridge",
-    reward: "Signal captured: timeline mapped.",
     body: `
       <div class="timeline">
         <div class="timeline-item"><time>Oct 2014 - Nov 2018</time><div><strong>Tribhuvan University</strong><span>Full scholarship, Bachelor in Computer Engineering.</span></div></div>
@@ -133,7 +128,6 @@ const stationData = {
     position: new THREE.Vector3(-24, 0, 22),
     title: "Playable ideas and shipped experiments.",
     kicker: "Project Circuit",
-    reward: "Signal captured: projects indexed.",
     body: `
       <div class="project-grid">
         ${projects.map((project) => `
@@ -152,15 +146,14 @@ const stationData = {
     ]
   },
   contact: {
-    name: "Signal Tower",
+    name: "Contact",
     label: "Contact",
     color: 0x7ac943,
     position: new THREE.Vector3(26, 0, 22),
     title: "Let's build something.",
-    kicker: "Signal Tower",
-    reward: "Signal captured: contact online.",
+    kicker: "Contact",
     body: `
-      <p>For collaborations, software work, prototypes, or a good engineering conversation, send a signal here.</p>
+      <p>For collaborations, software work, prototypes, or a good engineering conversation, message me here.</p>
       <form class="contact-form" action="https://formspree.io/iamishan9@gmail.com" method="post">
         <label>Name<input type="text" name="name" autocomplete="name" placeholder="Your name"></label>
         <label>Email<input type="email" name="_replyto" autocomplete="email" placeholder="you@example.com"></label>
@@ -206,26 +199,32 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 240);
-camera.position.set(0, 10, -14);
+const camera = new THREE.PerspectiveCamera(cameraFov(), window.innerWidth / window.innerHeight, 0.1, 260);
+camera.position.set(0, 11, -18);
 
 const clock = new THREE.Clock();
 const textureLoader = new THREE.TextureLoader();
 const world = new THREE.Group();
 const stationObjects = new Map();
 const visitedStations = new Set();
+const collisionBodies = [];
+const roadSegments = [];
+const carColliderRadius = 1.58;
+const carBaseHeight = 0.05;
+const stationPlatformRadius = 5.25;
+const stationPlatformTop = 0.18;
+const worldLimit = 68;
+const mobilePanelQuery = window.matchMedia("(max-width: 680px)");
 const keys = {
   forward: false,
   backward: false,
   left: false,
-  right: false,
-  brake: false
+  right: false
 };
 
 let activeStationId = "about";
 let guideTarget = null;
 let speed = 0;
-let toastTimer = 0;
 
 const materials = {
   grass: new THREE.MeshStandardMaterial({ color: 0x2e8a57, roughness: 0.92, metalness: 0.02 }),
@@ -292,6 +291,7 @@ function addGround() {
   water.rotation.x = -Math.PI / 2;
   water.position.set(35, 0.035, -35);
   world.add(water);
+  addCircleCollider(35, -35, 12.8);
 }
 
 function addRoadNetwork() {
@@ -315,6 +315,12 @@ function addRoadNetwork() {
 function addRoad(start, end, width) {
   const delta = new THREE.Vector3().subVectors(end, start);
   const length = Math.hypot(delta.x, delta.z);
+  roadSegments.push({
+    start: start.clone(),
+    end: end.clone(),
+    halfWidth: width / 2
+  });
+
   const road = new THREE.Mesh(new THREE.BoxGeometry(width, 0.08, length), materials.road);
   road.position.set((start.x + end.x) / 2, 0.045, (start.z + end.z) / 2);
   road.rotation.y = Math.atan2(delta.x, delta.z);
@@ -334,24 +340,30 @@ function addRoad(start, end, width) {
 
 function addScenery() {
   const random = seededRandom(7);
+  let placed = 0;
+  let attempts = 0;
 
-  for (let i = 0; i < 62; i += 1) {
-    const x = random() * 132 - 66;
-    const z = random() * 132 - 66;
-    if (Math.hypot(x, z) < 14 || isNearStation(x, z, 9)) {
+  while (placed < 62 && attempts < 240) {
+    attempts += 1;
+    const besideRoad = moveBesideRoad(random() * 132 - 66, random() * 132 - 66, 4.4);
+    const x = besideRoad.x;
+    const z = besideRoad.z;
+
+    if (Math.hypot(x, z) < 14 || isNearStation(x, z, 9) || isNearRoad(x, z, 2.2)) {
       continue;
     }
-    if (i % 5 === 0) {
+
+    if (placed % 5 === 0) {
       addBeaconBuilding(x, z, 1 + random() * 2.4, random);
     } else {
       addTree(x, z, 0.8 + random() * 1.2);
     }
+    placed += 1;
   }
 
   addSkillSculpture();
   addExperiencePillars();
   addProjectBillboards();
-  addContactTower();
   addAvatarBoard();
 }
 
@@ -369,18 +381,23 @@ function addTree(x, z, scale) {
 
   tree.position.set(x, 0, z);
   world.add(tree);
+  addCircleCollider(x, z, 0.72 * scale);
 }
 
 function addBeaconBuilding(x, z, height, random) {
+  const width = 1.4 + random() * 1.2;
+  const depth = 1.4 + random() * 1.4;
+  const rotation = random() * Math.PI;
   const building = new THREE.Mesh(
-    new THREE.BoxGeometry(1.4 + random() * 1.2, height, 1.4 + random() * 1.4),
+    new THREE.BoxGeometry(width, height, depth),
     materials.building
   );
   building.position.set(x, height / 2, z);
-  building.rotation.y = random() * Math.PI;
+  building.rotation.y = rotation;
   building.castShadow = true;
   building.receiveShadow = true;
   world.add(building);
+  addBoxCollider(x, z, width + 0.2, depth + 0.2, rotation);
 }
 
 function addStations() {
@@ -396,16 +413,17 @@ function addStations() {
       emissiveIntensity: 0.16
     });
 
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.8, 0.55, 32), materials.dark);
-    base.position.y = 0.28;
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(4.25, 4.75, 0.18, 40), materials.dark);
+    base.position.y = stationPlatformTop / 2;
     base.castShadow = true;
     base.receiveShadow = true;
     group.add(base);
 
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(4.9, 0.12, 8, 64), stationMaterial);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = 0.66;
-    group.add(ring);
+    const top = new THREE.Mesh(new THREE.CircleGeometry(4.25, 40), stationMaterial);
+    top.rotation.x = -Math.PI / 2;
+    top.position.y = stationPlatformTop + 0.006;
+    top.receiveShadow = true;
+    group.add(top);
 
     const beacon = new THREE.Mesh(new THREE.IcosahedronGeometry(0.95, 1), stationMaterial);
     beacon.position.y = 3.4;
@@ -421,27 +439,27 @@ function addStations() {
     group.add(label);
 
     world.add(group);
-    stationObjects.set(id, { group, beacon, ring, light, label });
+    stationObjects.set(id, { group, beacon, light, label });
   });
 }
 
 function addSkillSculpture() {
-  const base = stationData.skills.position;
   const levels = [8, 7.5, 7.5, 7];
   const colors = [0x39c6e6, 0xf7bd38, 0xff6f61, 0x7ac943];
 
   levels.forEach((level, index) => {
     const mat = new THREE.MeshStandardMaterial({ color: colors[index], roughness: 0.45, metalness: 0.1 });
     const bar = new THREE.Mesh(new THREE.BoxGeometry(1.2, level * 0.55, 1.2), mat);
-    bar.position.set(base.x - 3 + index * 2, level * 0.275 + 0.6, base.z + 7.2);
+    const roadside = pointBesideRoad(stationData.skills.position, stationData.projects.position, 0.16 + index * 0.06, 1, 6.2);
+    bar.position.set(roadside.x, level * 0.275 + 0.6, roadside.z);
     bar.castShadow = true;
     bar.receiveShadow = true;
     world.add(bar);
+    addBoxCollider(bar.position.x, bar.position.z, 1.36, 1.36, 0);
   });
 }
 
 function addExperiencePillars() {
-  const base = stationData.experience.position;
   const heights = [2.2, 3.4, 4.6, 3.2, 4.1];
 
   heights.forEach((height, index) => {
@@ -449,21 +467,22 @@ function addExperiencePillars() {
       new THREE.CylinderGeometry(0.54, 0.7, height, 12),
       new THREE.MeshStandardMaterial({ color: index % 2 ? 0xff6f61 : 0xf7bd38, roughness: 0.42, metalness: 0.12 })
     );
-    pillar.position.set(base.x - 5 + index * 2.5, height / 2 + 0.35, base.z + 7.2);
+    const roadside = pointBesideRoad(stationData.experience.position, stationData.contact.position, 0.16 + index * 0.07, -1, 6.4);
+    pillar.position.set(roadside.x, height / 2 + 0.35, roadside.z);
     pillar.castShadow = true;
     world.add(pillar);
+    addCircleCollider(pillar.position.x, pillar.position.z, 0.78);
   });
 }
 
 function addProjectBillboards() {
-  const base = stationData.projects.position;
   const boardPositions = [
-    [-7, 5.8],
-    [-2.4, 7.2],
-    [2.4, 7.2],
-    [7, 5.8],
-    [-4.5, -7.1],
-    [4.5, -7.1]
+    { from: "projects", to: "contact", t: 0.18, side: -1 },
+    { from: "projects", to: "contact", t: 0.34, side: -1 },
+    { from: "projects", to: "contact", t: 0.5, side: -1 },
+    { from: "projects", to: "skills", t: 0.18, side: 1 },
+    { from: "projects", to: "skills", t: 0.34, side: 1 },
+    { from: "projects", to: "skills", t: 0.5, side: 1 }
   ];
 
   projects.forEach((project, index) => {
@@ -483,45 +502,19 @@ function addProjectBillboards() {
     image.position.z = 0.13;
     board.add(image);
 
-    const [x, z] = boardPositions[index];
-    board.position.set(base.x + x, 2.15, base.z + z);
-    board.lookAt(base.x, 2.15, base.z);
+    const placement = boardPositions[index];
+    const start = stationData[placement.from].position;
+    const end = stationData[placement.to].position;
+    const roadside = pointBesideRoad(start, end, placement.t, placement.side, 6.5);
+    const centerline = pointOnRoad(start, end, placement.t);
+    board.position.set(roadside.x, 2.15, roadside.z);
+    board.lookAt(centerline.x, 2.15, centerline.z);
     world.add(board);
+    addBoxCollider(board.position.x, board.position.z, 4.5, 0.68, board.rotation.y);
   });
 }
 
-function addContactTower() {
-  const base = stationData.contact.position;
-  const tower = new THREE.Group();
-
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.42, 6.4, 16), materials.white);
-  mast.position.y = 3.4;
-  mast.castShadow = true;
-  tower.add(mast);
-
-  const dish = new THREE.Mesh(
-    new THREE.TorusGeometry(1.8, 0.12, 8, 32),
-    new THREE.MeshStandardMaterial({ color: 0x7ac943, roughness: 0.38, metalness: 0.12 })
-  );
-  dish.position.set(0, 6.6, 0.25);
-  dish.rotation.x = Math.PI / 2.8;
-  tower.add(dish);
-
-  const pulse = new THREE.Mesh(
-    new THREE.TorusGeometry(2.8, 0.05, 8, 48),
-    new THREE.MeshBasicMaterial({ color: 0x7ac943, transparent: true, opacity: 0.5 })
-  );
-  pulse.position.set(0, 6.6, 0.25);
-  pulse.rotation.x = Math.PI / 2.8;
-  tower.add(pulse);
-
-  tower.position.set(base.x + 6.8, 0, base.z - 3.4);
-  tower.userData.pulse = pulse;
-  world.add(tower);
-}
-
 function addAvatarBoard() {
-  const base = stationData.about.position;
   const board = new THREE.Group();
 
   const frame = new THREE.Mesh(new THREE.BoxGeometry(3.3, 3.3, 0.28), materials.dark);
@@ -535,18 +528,26 @@ function addAvatarBoard() {
     material.needsUpdate = true;
   });
 
-  const image = new THREE.Mesh(new THREE.PlaneGeometry(2.85, 2.85), material);
-  image.position.z = 0.16;
-  board.add(image);
+  const frontImage = new THREE.Mesh(new THREE.PlaneGeometry(2.85, 2.85), material);
+  frontImage.position.z = 0.16;
+  board.add(frontImage);
 
-  board.position.set(base.x - 6.5, 2.6, base.z + 4.8);
-  board.rotation.y = Math.PI / 5;
+  const backImage = new THREE.Mesh(new THREE.PlaneGeometry(2.85, 2.85), material);
+  backImage.position.z = -0.16;
+  backImage.rotation.y = Math.PI;
+  board.add(backImage);
+
+  const roadside = pointBesideRoad(stationData.about.position, stationData.contact.position, 0.24, 1, 6.8);
+  const centerline = pointOnRoad(stationData.about.position, stationData.contact.position, 0.24);
+  board.position.set(roadside.x, 2.6, roadside.z);
+  board.lookAt(centerline.x, 2.6, centerline.z);
   world.add(board);
+  addBoxCollider(board.position.x, board.position.z, 3.5, 0.72, board.rotation.y);
 }
 
 function createCar() {
   const group = new THREE.Group();
-  group.position.set(0, 0.05, -6);
+  group.position.set(0, carBaseHeight, -7.2);
   group.rotation.y = 0.35;
 
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.62, 2.75), new THREE.MeshStandardMaterial({ color: 0xff6f61, roughness: 0.36, metalness: 0.12 }));
@@ -642,6 +643,16 @@ function roundRect(context, x, y, width, height, radius) {
 function bindEvents() {
   window.addEventListener("resize", onResize);
 
+  if (mobilePanelQuery.addEventListener) {
+    mobilePanelQuery.addEventListener("change", syncPanelMode);
+  } else {
+    mobilePanelQuery.addListener(syncPanelMode);
+  }
+
+  panelToggle.addEventListener("click", () => {
+    setPanelCollapsed(!contentPanel.classList.contains("is-collapsed"));
+  });
+
   window.addEventListener("keydown", (event) => {
     const control = keyMap(event);
     if (!control) {
@@ -683,6 +694,8 @@ function bindEvents() {
     button.addEventListener("pointercancel", (event) => setPressed(false, event));
     button.addEventListener("pointerleave", (event) => setPressed(false, event));
   });
+
+  syncPanelMode();
 }
 
 function keyMap(event) {
@@ -694,8 +707,7 @@ function keyMap(event) {
     KeyA: "left",
     ArrowLeft: "left",
     KeyD: "right",
-    ArrowRight: "right",
-    Space: "brake"
+    ArrowRight: "right"
   };
   return map[event.code];
 }
@@ -712,9 +724,9 @@ function jumpToStation(id, options = {}) {
   if (!station) {
     return;
   }
-  const offset = new THREE.Vector3(0, 0, -6).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.group.rotation.y);
+  const offset = new THREE.Vector3(0, 0, -7.2).applyAxisAngle(new THREE.Vector3(0, 1, 0), car.group.rotation.y);
   car.group.position.copy(station.position).add(offset);
-  car.group.position.y = 0.05;
+  car.group.position.y = getDriveHeight(car.group.position);
   speed = 0;
   guideTarget = station.position.clone();
   setActiveStation(id, { collect: true, silent: options.silent });
@@ -728,7 +740,6 @@ function setActiveStation(id, options = {}) {
   }
 
   activeStationId = id;
-  zoneName.textContent = station.name;
   panelKicker.textContent = station.kicker;
   panelTitle.textContent = station.title;
   panelBody.innerHTML = station.body;
@@ -737,12 +748,11 @@ function setActiveStation(id, options = {}) {
 
   if (options.collect && !visitedStations.has(id)) {
     visitedStations.add(id);
-    if (!options.silent) {
-      showToast(station.reward);
-    }
   }
 
-  scoreValue.textContent = `${visitedStations.size}/5`;
+  if (mobilePanelQuery.matches) {
+    setPanelCollapsed(true);
+  }
 }
 
 function actionMarkup(actions) {
@@ -752,23 +762,12 @@ function actionMarkup(actions) {
   }).join("");
 }
 
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add("is-visible");
-  clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => toast.classList.remove("is-visible"), 2200);
-}
-
 function updateDriving(dt) {
   const accel = keys.forward ? 17 : 0;
   const reverse = keys.backward ? 13 : 0;
 
   speed += accel * dt;
   speed -= reverse * dt;
-
-  if (keys.brake) {
-    speed *= Math.pow(0.18, dt);
-  }
 
   speed *= Math.pow(0.64, dt);
   speed = THREE.MathUtils.clamp(speed, -7.2, 15.5);
@@ -777,24 +776,31 @@ function updateDriving(dt) {
   car.group.rotation.y += steering * dt * 1.95 * Math.sign(speed || 1);
 
   const forward = new THREE.Vector3(Math.sin(car.group.rotation.y), 0, Math.cos(car.group.rotation.y));
-  car.group.position.addScaledVector(forward, speed * dt);
-  car.group.position.x = THREE.MathUtils.clamp(car.group.position.x, -68, 68);
-  car.group.position.z = THREE.MathUtils.clamp(car.group.position.z, -68, 68);
+  const nextPosition = car.group.position.clone().addScaledVector(forward, speed * dt);
+  nextPosition.x = THREE.MathUtils.clamp(nextPosition.x, -worldLimit, worldLimit);
+  nextPosition.z = THREE.MathUtils.clamp(nextPosition.z, -worldLimit, worldLimit);
+
+  const collided = resolveCollisions(nextPosition);
+  car.group.position.copy(nextPosition);
+  car.group.position.y = THREE.MathUtils.lerp(car.group.position.y, getDriveHeight(car.group.position), 0.22);
+
+  if (collided && Math.abs(speed) > 0.2) {
+    speed *= -0.18;
+  }
 
   car.wheels.forEach((wheel) => {
     wheel.rotation.x += speed * dt * 2.2;
   });
 
-  speedValue.textContent = Math.round(Math.abs(speed) * 7).toString();
 }
 
 function updateCamera() {
   const rotation = car.group.rotation.y;
-  const behind = new THREE.Vector3(-Math.sin(rotation) * 10, 6.4, -Math.cos(rotation) * 10);
-  const side = new THREE.Vector3(Math.cos(rotation) * 2.2, 0, -Math.sin(rotation) * 2.2);
+  const behind = new THREE.Vector3(-Math.sin(rotation) * 15, 8.4, -Math.cos(rotation) * 15);
+  const side = new THREE.Vector3(Math.cos(rotation) * 3.1, 0, -Math.sin(rotation) * 3.1);
   const desired = car.group.position.clone().add(behind).add(side);
-  camera.position.lerp(desired, 0.075);
-  camera.lookAt(car.group.position.x, car.group.position.y + 1.2, car.group.position.z);
+  camera.position.lerp(desired, 0.068);
+  camera.lookAt(car.group.position.x, car.group.position.y + 1, car.group.position.z);
 }
 
 function updateStations(elapsed) {
@@ -811,11 +817,10 @@ function updateStations(elapsed) {
 
     object.beacon.rotation.y += 0.016;
     object.beacon.position.y = 3.4 + Math.sin(elapsed * 2.2 + station.position.x) * 0.18;
-    object.ring.rotation.z += 0.01;
+    object.beacon.scale.lerp(new THREE.Vector3(distance < 9 ? 1.16 : 1, distance < 9 ? 1.16 : 1, distance < 9 ? 1.16 : 1), 0.08);
     object.light.intensity = visitedStations.has(id) ? 3.4 : 2.1;
     object.label.material.opacity = THREE.MathUtils.clamp((distance - 8) / 8, 0, 1);
     object.label.visible = object.label.material.opacity > 0.02;
-    object.group.scale.lerp(new THREE.Vector3(distance < 9 ? 1.08 : 1, distance < 9 ? 1.08 : 1, distance < 9 ? 1.08 : 1), 0.08);
   });
 
   if (nearestDistance < 8.6 && nearest !== activeStationId) {
@@ -859,10 +864,242 @@ function animate() {
 function onResize() {
   const width = window.innerWidth;
   const height = window.innerHeight;
+  camera.fov = cameraFov();
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+}
+
+function syncPanelMode() {
+  setPanelCollapsed(mobilePanelQuery.matches);
+}
+
+function setPanelCollapsed(collapsed) {
+  contentPanel.classList.toggle("is-collapsed", collapsed);
+  panelToggle.setAttribute("aria-expanded", String(!collapsed));
+  panelToggle.setAttribute("aria-label", collapsed ? "Show info panel" : "Hide info panel");
+  panelToggle.setAttribute("title", collapsed ? "Show info panel" : "Hide info panel");
+}
+
+function cameraFov() {
+  return window.innerWidth < 680 ? 66 : 62;
+}
+
+function getDriveHeight(position) {
+  const platformY = stationPlatformTop + carBaseHeight;
+
+  return Object.values(stationData).reduce((height, station) => {
+    const distance = flatDistance(position, station.position);
+
+    if (distance < stationPlatformRadius) {
+      return Math.max(height, platformY);
+    }
+
+    if (distance < stationPlatformRadius + 1.8) {
+      const ramp = (distance - stationPlatformRadius) / 1.8;
+      return Math.max(height, THREE.MathUtils.lerp(platformY, carBaseHeight, ramp));
+    }
+
+    return height;
+  }, carBaseHeight);
+}
+
+function addCircleCollider(x, z, radius) {
+  collisionBodies.push({ type: "circle", x, z, radius });
+}
+
+function addBoxCollider(x, z, width, depth, rotation = 0) {
+  collisionBodies.push({
+    type: "box",
+    x,
+    z,
+    halfWidth: width / 2,
+    halfDepth: depth / 2,
+    rotation,
+    cos: Math.cos(rotation),
+    sin: Math.sin(rotation)
+  });
+}
+
+function resolveCollisions(position) {
+  let collided = false;
+
+  for (let pass = 0; pass < 3; pass += 1) {
+    let passCollided = false;
+
+    collisionBodies.forEach((body) => {
+      const push = body.type === "circle"
+        ? getCirclePush(position, body)
+        : getBoxPush(position, body);
+
+      if (push) {
+        position.x += push.x;
+        position.z += push.z;
+        position.x = THREE.MathUtils.clamp(position.x, -worldLimit, worldLimit);
+        position.z = THREE.MathUtils.clamp(position.z, -worldLimit, worldLimit);
+        collided = true;
+        passCollided = true;
+      }
+    });
+
+    if (!passCollided) {
+      break;
+    }
+  }
+
+  return collided;
+}
+
+function getCirclePush(position, body) {
+  const minDistance = body.radius + carColliderRadius;
+  const dx = position.x - body.x;
+  const dz = position.z - body.z;
+  const distanceSq = dx * dx + dz * dz;
+
+  if (distanceSq >= minDistance * minDistance) {
+    return null;
+  }
+
+  const distance = Math.sqrt(distanceSq);
+  if (distance === 0) {
+    return { x: minDistance, z: 0 };
+  }
+
+  const pushDistance = minDistance - distance;
+  return {
+    x: (dx / distance) * pushDistance,
+    z: (dz / distance) * pushDistance
+  };
+}
+
+function getBoxPush(position, body) {
+  const dx = position.x - body.x;
+  const dz = position.z - body.z;
+  const localX = dx * body.cos - dz * body.sin;
+  const localZ = dx * body.sin + dz * body.cos;
+  const closestX = THREE.MathUtils.clamp(localX, -body.halfWidth, body.halfWidth);
+  const closestZ = THREE.MathUtils.clamp(localZ, -body.halfDepth, body.halfDepth);
+  let pushX = localX - closestX;
+  let pushZ = localZ - closestZ;
+  const distanceSq = pushX * pushX + pushZ * pushZ;
+
+  if (distanceSq > carColliderRadius * carColliderRadius) {
+    return null;
+  }
+
+  if (distanceSq === 0) {
+    const overlapX = body.halfWidth + carColliderRadius - Math.abs(localX);
+    const overlapZ = body.halfDepth + carColliderRadius - Math.abs(localZ);
+
+    if (overlapX < overlapZ) {
+      pushX = (localX < 0 ? -1 : 1) * overlapX;
+      pushZ = 0;
+    } else {
+      pushX = 0;
+      pushZ = (localZ < 0 ? -1 : 1) * overlapZ;
+    }
+  } else {
+    const distance = Math.sqrt(distanceSq);
+    const pushDistance = carColliderRadius - distance;
+    pushX = (pushX / distance) * pushDistance;
+    pushZ = (pushZ / distance) * pushDistance;
+  }
+
+  return {
+    x: pushX * body.cos + pushZ * body.sin,
+    z: -pushX * body.sin + pushZ * body.cos
+  };
+}
+
+function pointOnRoad(start, end, t) {
+  return {
+    x: THREE.MathUtils.lerp(start.x, end.x, t),
+    z: THREE.MathUtils.lerp(start.z, end.z, t)
+  };
+}
+
+function pointBesideRoad(start, end, t, side, offset) {
+  const point = pointOnRoad(start, end, t);
+  const dx = end.x - start.x;
+  const dz = end.z - start.z;
+  const length = Math.hypot(dx, dz) || 1;
+  const normalX = -dz / length;
+  const normalZ = dx / length;
+
+  return {
+    x: THREE.MathUtils.clamp(point.x + normalX * side * offset, -worldLimit, worldLimit),
+    z: THREE.MathUtils.clamp(point.z + normalZ * side * offset, -worldLimit, worldLimit)
+  };
+}
+
+function moveBesideRoad(x, z, clearance) {
+  const nearest = nearestRoadInfo(x, z);
+  if (!nearest || nearest.distance >= nearest.segment.halfWidth + clearance) {
+    return {
+      x: THREE.MathUtils.clamp(x, -worldLimit, worldLimit),
+      z: THREE.MathUtils.clamp(z, -worldLimit, worldLimit)
+    };
+  }
+
+  let normalX = x - nearest.closestX;
+  let normalZ = z - nearest.closestZ;
+
+  if (nearest.distance < 0.001) {
+    normalX = -nearest.directionZ;
+    normalZ = nearest.directionX;
+    if (x + z < 0) {
+      normalX *= -1;
+      normalZ *= -1;
+    }
+  } else {
+    normalX /= nearest.distance;
+    normalZ /= nearest.distance;
+  }
+
+  const distance = nearest.segment.halfWidth + clearance;
+  return {
+    x: THREE.MathUtils.clamp(nearest.closestX + normalX * distance, -worldLimit, worldLimit),
+    z: THREE.MathUtils.clamp(nearest.closestZ + normalZ * distance, -worldLimit, worldLimit)
+  };
+}
+
+function isNearRoad(x, z, clearance = 0) {
+  const nearest = nearestRoadInfo(x, z);
+  return Boolean(nearest && nearest.distance < nearest.segment.halfWidth + clearance);
+}
+
+function nearestRoadInfo(x, z) {
+  return roadSegments.reduce((nearest, segment) => {
+    const info = roadDistanceInfo(x, z, segment);
+    if (!nearest || info.distance < nearest.distance) {
+      return info;
+    }
+    return nearest;
+  }, null);
+}
+
+function roadDistanceInfo(x, z, segment) {
+  const dx = segment.end.x - segment.start.x;
+  const dz = segment.end.z - segment.start.z;
+  const lengthSq = dx * dx + dz * dz;
+  const t = lengthSq === 0
+    ? 0
+    : THREE.MathUtils.clamp(((x - segment.start.x) * dx + (z - segment.start.z) * dz) / lengthSq, 0, 1);
+  const closestX = segment.start.x + dx * t;
+  const closestZ = segment.start.z + dz * t;
+  const distanceX = x - closestX;
+  const distanceZ = z - closestZ;
+  const length = Math.sqrt(lengthSq) || 1;
+
+  return {
+    segment,
+    closestX,
+    closestZ,
+    directionX: dx / length,
+    directionZ: dz / length,
+    distance: Math.hypot(distanceX, distanceZ)
+  };
 }
 
 function isNearStation(x, z, radius) {
