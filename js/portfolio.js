@@ -175,8 +175,8 @@ const stationData = {
 };
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x11171a);
-scene.fog = new THREE.Fog(0x11171a, 36, 116);
+scene.background = new THREE.Color(0x0d1215);
+scene.fog = new THREE.Fog(0x0d1215, 36, 116);
 
 let renderer;
 
@@ -225,6 +225,19 @@ const keys = {
 let activeStationId = "about";
 let guideTarget = null;
 let speed = 0;
+let avatarBoard = null;
+const cameraView = {
+  yawOffset: 0,
+  distanceOffset: 0,
+  heightOffset: 0,
+  fovOffset: 0
+};
+const cameraDrag = {
+  active: false,
+  pointerId: null,
+  lastX: 0,
+  lastY: 0
+};
 
 const materials = {
   grass: new THREE.MeshStandardMaterial({ color: 0x2e8a57, roughness: 0.92, metalness: 0.02 }),
@@ -425,11 +438,6 @@ function addStations() {
     top.receiveShadow = true;
     group.add(top);
 
-    const beacon = new THREE.Mesh(new THREE.IcosahedronGeometry(0.95, 1), stationMaterial);
-    beacon.position.y = 3.4;
-    beacon.castShadow = true;
-    group.add(beacon);
-
     const light = new THREE.PointLight(station.color, 2.2, 18, 1.6);
     light.position.y = 3.3;
     group.add(light);
@@ -439,7 +447,7 @@ function addStations() {
     group.add(label);
 
     world.add(group);
-    stationObjects.set(id, { group, beacon, light, label });
+    stationObjects.set(id, { group, light, label });
   });
 }
 
@@ -476,14 +484,9 @@ function addExperiencePillars() {
 }
 
 function addProjectBillboards() {
-  const boardPositions = [
-    { from: "projects", to: "contact", t: 0.18, side: -1 },
-    { from: "projects", to: "contact", t: 0.34, side: -1 },
-    { from: "projects", to: "contact", t: 0.5, side: -1 },
-    { from: "projects", to: "skills", t: 0.18, side: 1 },
-    { from: "projects", to: "skills", t: 0.34, side: 1 },
-    { from: "projects", to: "skills", t: 0.5, side: 1 }
-  ];
+  const center = stationData.projects.position;
+  const arcAngles = [108, 128, 148, 168, 188, 208].map(THREE.MathUtils.degToRad);
+  const radius = 11.8;
 
   projects.forEach((project, index) => {
     const board = new THREE.Group();
@@ -502,13 +505,14 @@ function addProjectBillboards() {
     image.position.z = 0.13;
     board.add(image);
 
-    const placement = boardPositions[index];
-    const start = stationData[placement.from].position;
-    const end = stationData[placement.to].position;
-    const roadside = pointBesideRoad(start, end, placement.t, placement.side, 6.5);
-    const centerline = pointOnRoad(start, end, placement.t);
-    board.position.set(roadside.x, 2.15, roadside.z);
-    board.lookAt(centerline.x, 2.15, centerline.z);
+    const angle = arcAngles[index];
+    const galleryPoint = moveBesideRoad(
+      center.x + Math.cos(angle) * radius,
+      center.z + Math.sin(angle) * radius,
+      5.8
+    );
+    board.position.set(galleryPoint.x, 2.15, galleryPoint.z);
+    board.lookAt(center.x, 2.15, center.z);
     world.add(board);
     addBoxCollider(board.position.x, board.position.z, 4.5, 0.68, board.rotation.y);
   });
@@ -541,6 +545,8 @@ function addAvatarBoard() {
   const centerline = pointOnRoad(stationData.about.position, stationData.contact.position, 0.24);
   board.position.set(roadside.x, 2.6, roadside.z);
   board.lookAt(centerline.x, 2.6, centerline.z);
+  board.userData.baseRotationY = board.rotation.y;
+  avatarBoard = board;
   world.add(board);
   addBoxCollider(board.position.x, board.position.z, 3.5, 0.72, board.rotation.y);
 }
@@ -642,6 +648,12 @@ function roundRect(context, x, y, width, height, radius) {
 
 function bindEvents() {
   window.addEventListener("resize", onResize);
+  canvas.addEventListener("pointerdown", beginCameraDrag);
+  canvas.addEventListener("dblclick", resetCameraView);
+  canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+  window.addEventListener("pointermove", updateCameraDrag);
+  window.addEventListener("pointerup", endCameraDrag);
+  window.addEventListener("pointercancel", endCameraDrag);
 
   if (mobilePanelQuery.addEventListener) {
     mobilePanelQuery.addEventListener("change", syncPanelMode);
@@ -696,6 +708,60 @@ function bindEvents() {
   });
 
   syncPanelMode();
+}
+
+function beginCameraDrag(event) {
+  if (event.button !== 0) {
+    return;
+  }
+
+  cameraDrag.active = true;
+  cameraDrag.pointerId = event.pointerId;
+  cameraDrag.lastX = event.clientX;
+  cameraDrag.lastY = event.clientY;
+  canvas.setPointerCapture(event.pointerId);
+  document.body.classList.add("is-camera-dragging");
+  event.preventDefault();
+}
+
+function updateCameraDrag(event) {
+  if (!cameraDrag.active || event.pointerId !== cameraDrag.pointerId) {
+    return;
+  }
+
+  const dx = event.clientX - cameraDrag.lastX;
+  const dy = event.clientY - cameraDrag.lastY;
+  cameraDrag.lastX = event.clientX;
+  cameraDrag.lastY = event.clientY;
+
+  cameraView.yawOffset = wrapAngle(cameraView.yawOffset - dx * 0.006);
+  cameraView.distanceOffset = THREE.MathUtils.clamp(cameraView.distanceOffset + dy * 0.035, -4.2, 7.5);
+  cameraView.heightOffset = THREE.MathUtils.clamp(cameraView.heightOffset + dy * 0.018, -2.2, 4.8);
+  cameraView.fovOffset = THREE.MathUtils.clamp(cameraView.fovOffset + dy * 0.04, -10, 14);
+  applyCameraFov();
+  event.preventDefault();
+}
+
+function endCameraDrag(event) {
+  if (!cameraDrag.active || event.pointerId !== cameraDrag.pointerId) {
+    return;
+  }
+
+  cameraDrag.active = false;
+  cameraDrag.pointerId = null;
+  document.body.classList.remove("is-camera-dragging");
+
+  if (canvas.hasPointerCapture(event.pointerId)) {
+    canvas.releasePointerCapture(event.pointerId);
+  }
+}
+
+function resetCameraView() {
+  cameraView.yawOffset = 0;
+  cameraView.distanceOffset = 0;
+  cameraView.heightOffset = 0;
+  cameraView.fovOffset = 0;
+  applyCameraFov();
 }
 
 function keyMap(event) {
@@ -795,15 +861,17 @@ function updateDriving(dt) {
 }
 
 function updateCamera() {
-  const rotation = car.group.rotation.y;
-  const behind = new THREE.Vector3(-Math.sin(rotation) * 15, 8.4, -Math.cos(rotation) * 15);
+  const rotation = car.group.rotation.y + cameraView.yawOffset;
+  const distance = 15 + cameraView.distanceOffset;
+  const height = 8.4 + cameraView.heightOffset;
+  const behind = new THREE.Vector3(-Math.sin(rotation) * distance, height, -Math.cos(rotation) * distance);
   const side = new THREE.Vector3(Math.cos(rotation) * 3.1, 0, -Math.sin(rotation) * 3.1);
   const desired = car.group.position.clone().add(behind).add(side);
   camera.position.lerp(desired, 0.068);
   camera.lookAt(car.group.position.x, car.group.position.y + 1, car.group.position.z);
 }
 
-function updateStations(elapsed) {
+function updateStations() {
   let nearest = activeStationId;
   let nearestDistance = Infinity;
 
@@ -815,9 +883,6 @@ function updateStations(elapsed) {
       nearestDistance = distance;
     }
 
-    object.beacon.rotation.y += 0.016;
-    object.beacon.position.y = 3.4 + Math.sin(elapsed * 2.2 + station.position.x) * 0.18;
-    object.beacon.scale.lerp(new THREE.Vector3(distance < 9 ? 1.16 : 1, distance < 9 ? 1.16 : 1, distance < 9 ? 1.16 : 1), 0.08);
     object.light.intensity = visitedStations.has(id) ? 3.4 : 2.1;
     object.label.material.opacity = THREE.MathUtils.clamp((distance - 8) / 8, 0, 1);
     object.label.visible = object.label.material.opacity > 0.02;
@@ -850,13 +915,22 @@ function updateGuide(elapsed) {
   guideArrow.rotation.y = angle;
 }
 
+function updateAvatarBoard(elapsed) {
+  if (!avatarBoard) {
+    return;
+  }
+
+  avatarBoard.rotation.y = avatarBoard.userData.baseRotationY + elapsed * 0.45;
+}
+
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;
   updateDriving(dt);
   updateCamera();
-  updateStations(elapsed);
+  updateStations();
   updateGuide(elapsed);
+  updateAvatarBoard(elapsed);
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
@@ -864,7 +938,7 @@ function animate() {
 function onResize() {
   const width = window.innerWidth;
   const height = window.innerHeight;
-  camera.fov = cameraFov();
+  camera.fov = currentCameraFov();
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
@@ -884,6 +958,19 @@ function setPanelCollapsed(collapsed) {
 
 function cameraFov() {
   return window.innerWidth < 680 ? 66 : 62;
+}
+
+function currentCameraFov() {
+  return THREE.MathUtils.clamp(cameraFov() + cameraView.fovOffset, 48, 78);
+}
+
+function applyCameraFov() {
+  camera.fov = currentCameraFov();
+  camera.updateProjectionMatrix();
+}
+
+function wrapAngle(angle) {
+  return THREE.MathUtils.euclideanModulo(angle + Math.PI, Math.PI * 2) - Math.PI;
 }
 
 function getDriveHeight(position) {
